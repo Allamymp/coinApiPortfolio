@@ -6,6 +6,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional
 public class CoinService {
@@ -27,12 +29,15 @@ public class CoinService {
         if (toSaveCoin == null) {
             throw new IllegalArgumentException("Coin object cannot be null");
         }
-        Coin savedCoin = coinRepository.findById(toSaveCoin.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Coin not found for id: " + toSaveCoin.getId()));
+        Coin savedCoin = coinRepository.findByName(toSaveCoin.getName())
+                .orElseThrow(() -> new EntityNotFoundException("Coin not found for name: " + toSaveCoin.getName()));
 
-        if (savedCoin.getCoin_value().compareTo(toSaveCoin.getCoin_value()) != 0) {
-            savedCoin.setCoin_value(toSaveCoin.getCoin_value());
+        if (savedCoin.getPrice().compareTo(toSaveCoin.getPrice()) != 0) {
+            savedCoin.setPrice(toSaveCoin.getPrice());
         }
         coinRepository.save(savedCoin);
+    }
+    public List<Coin> listAll(){
+        return coinRepository.findAll();
     }
 }

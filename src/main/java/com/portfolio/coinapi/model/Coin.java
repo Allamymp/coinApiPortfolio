@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.Instant;
 
 @Entity(name = "TB_COIN")
 @AllArgsConstructor
@@ -27,15 +27,22 @@ public class Coin {
     @Column(unique = true)
     private String name;
     @NotNull
-    private BigDecimal coin_value;
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastUpdate;
+    private BigDecimal price;
+    @NotNull
+    private BigDecimal marketValue;
+    @NotNull
+    private BigDecimal last24hChange;
+    @NotNull
+    private Instant lastUpdate;
     @ManyToOne
     private Wallet wallet;
 
 
-    public Coin(String name, BigDecimal coin_value) {
+    public Coin(String name, BigDecimal price, BigDecimal marketValue, BigDecimal last24hChange, Instant lastUpdate ) {
         this.name = name;
-        this.coin_value = coin_value;
+        this.price = price;
+        this.marketValue = marketValue;
+        this.last24hChange = last24hChange;
+        this.lastUpdate = lastUpdate;
     }
 }

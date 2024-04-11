@@ -17,12 +17,12 @@ public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @NotNull
     @NotBlank
+    @NotNull
     @Column(unique = true)
     private String username;
-    @NotNull
     @NotBlank
+    @NotNull
     private String password;
     @OneToOne(mappedBy = "client", cascade = CascadeType.ALL)
     private Wallet wallet;
