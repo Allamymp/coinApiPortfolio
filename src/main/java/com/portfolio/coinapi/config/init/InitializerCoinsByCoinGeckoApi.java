@@ -31,11 +31,11 @@ public class InitializerCoinsByCoinGeckoApi {
                 updateCoins();
             }
         } catch (Exception e) {
-            e.printStackTrace(); // Log the exception or handle it accordingly.
+            e.printStackTrace();
         }
     }
 
-    @Scheduled(fixedDelay = 553000) // 553 segundos
+    @Scheduled(fixedDelay = 553000) // 553 seconds
     @CacheEvict(value = "coins", allEntries = true)
     public void updateCoins() throws InterruptedException {
         List<Coin> coinList = coinGeckoService.fetchCoinDetails();
