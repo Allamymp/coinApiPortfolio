@@ -38,7 +38,13 @@ public class CoinGeckoService {
 
     @Cacheable("coins")
     public List<Coin> fetchCoinDetails(){
-        ResponseEntity<String> response = coinGeckoClient.getCoinsDetailsRaw(getAllCoinIdsAsString());
+        ResponseEntity<String> response = coinGeckoClient
+                .getCoinsDetailsRaw(
+                        getAllCoinIdsAsString()
+                        ,"usd"
+                        ,true
+                        ,true
+                        ,true);
         JsonNode root = null;
         try {
             root = objectMapper.readTree(response.getBody());

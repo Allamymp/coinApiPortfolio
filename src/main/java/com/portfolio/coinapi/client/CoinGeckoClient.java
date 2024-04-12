@@ -12,13 +12,14 @@ public interface CoinGeckoClient {
     @GetMapping(value = "/ping", headers = {"accept=application/json", "x-cg-demo-api-key=${coin.gecko.api.key}"})
     ResponseEntity<?> ping();
 
-    @GetMapping(value = "/simple/price"
-            , headers = {"accept=application/json", "x-cg-demo-api-key=${coin.gecko.api.key}"}
-            , params = {"vs_currencies=usd",
-            "includes_market_cap=true",
-            "include_24hr_change=true",
-            "include_last_updated_at=true"})
-   ResponseEntity<String> getCoinsDetailsRaw(@RequestParam("ids") String ids);
+    @GetMapping(value = "/simple/price", headers = {"accept=application/json", "x-cg-demo-api-key=${coin.gecko.api.key}"})
+    ResponseEntity<String> getCoinsDetailsRaw(
+            @RequestParam("ids") String ids,
+            @RequestParam("vs_currencies") String vsCurrencies,
+            @RequestParam("include_market_cap") boolean includeMarketCap,
+            @RequestParam("include_24hr_change") boolean include24hrChange,
+            @RequestParam("include_last_updated_at") boolean includeLastUpdatedAt);
+
 
 }
 
