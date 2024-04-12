@@ -17,7 +17,6 @@ import java.time.Instant;
 @NoArgsConstructor
 @Getter
 @Setter
-@EntityListeners(CoinListener.class)
 public class Coin {
 
     @Id
