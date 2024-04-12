@@ -32,10 +32,28 @@ public class CoinService {
         Coin savedCoin = coinRepository.findByName(toSaveCoin.getName())
                 .orElseThrow(() -> new EntityNotFoundException("Coin not found for name: " + toSaveCoin.getName()));
 
-        if (savedCoin.getPrice().compareTo(toSaveCoin.getPrice()) != 0) {
+        boolean updateRequired = false;
+
+        if (savedCoin.getPrice() == null || savedCoin.getPrice().compareTo(toSaveCoin.getPrice()) != 0) {
             savedCoin.setPrice(toSaveCoin.getPrice());
+            updateRequired = true;
         }
-        coinRepository.save(savedCoin);
+        if (savedCoin.getLastUpdate() == null || savedCoin.getLastUpdate().isBefore(toSaveCoin.getLastUpdate())) {
+            savedCoin.setLastUpdate(toSaveCoin.getLastUpdate());
+            updateRequired = true;
+        }
+        if (savedCoin.getLast24hChange() == null || savedCoin.getLast24hChange().compareTo(toSaveCoin.getLast24hChange()) != 0) {
+            savedCoin.setLast24hChange(toSaveCoin.getLast24hChange());
+            updateRequired = true;
+        }
+        if (savedCoin.getMarketValue() == null || savedCoin.getMarketValue().compareTo(toSaveCoin.getMarketValue()) != 0) {
+            savedCoin.setMarketValue(toSaveCoin.getMarketValue());
+            updateRequired = true;
+        }
+
+        if (updateRequired) {
+            coinRepository.save(savedCoin);
+        }
     }
     public List<Coin> listAll(){
         return coinRepository.findAll();
