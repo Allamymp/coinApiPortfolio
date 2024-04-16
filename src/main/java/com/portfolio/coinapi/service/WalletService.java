@@ -7,6 +7,7 @@ import com.portfolio.coinapi.repository.WalletRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,8 +30,9 @@ public class WalletService {
     public List<Coin> listCoinsByWalletId(Long walletId) {
         Wallet wallet = walletRepository.findById(walletId)
                 .orElseThrow(() -> new EntityNotFoundException("Wallet not found for id: " + walletId));
-        return wallet.getCoinList();
+        return new ArrayList<>(wallet.getCoinList());
     }
+
 
     public void removeCoin(Long walletId, Long coinId) {
         Wallet wallet = walletRepository.findById(walletId)
