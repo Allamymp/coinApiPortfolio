@@ -6,6 +6,8 @@ import com.portfolio.coinapi.model.Client;
 import com.portfolio.coinapi.model.Wallet;
 import com.portfolio.coinapi.repository.ClientRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,15 +25,18 @@ public class ClientService {
 
 
     public Client create(Client client) {
-
         if (clientRepository.existsByUsername(client.getUsername())) {
             throw new DuplicateUsernameException("Username already exists: " + client.getUsername());
         }
+
         Wallet wallet = new Wallet();
+
         client.setWallet(wallet);
-        walletService.create(wallet);
+        wallet.setClient(client);
+
         return clientRepository.save(client);
     }
+
 
     public Client findById(Long id) {
         return clientRepository.findById(id)
@@ -44,8 +49,8 @@ public class ClientService {
                 .orElseThrow(() -> new EntityNotFoundException("Client not found for username: " + username));
     }
 
-    public List<Client> allClients() {
-        return clientRepository.findAll();
+    public Page<Client> allClients(Pageable pageable) {
+        return clientRepository.findAll(pageable);
     }
 
     public void update(Client client) {

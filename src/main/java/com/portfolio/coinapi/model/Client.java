@@ -1,5 +1,6 @@
 package com.portfolio.coinapi.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,12 +26,12 @@ public class Client {
     @NotNull
     private String password;
     @OneToOne(mappedBy = "client", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private Wallet wallet;
 
-    public Client(String username, String password, Wallet wallet) {
+    public Client(String username, String password) {
         this.username = username;
         this.password = password;
-        this.wallet = wallet;
     }
 
 }
