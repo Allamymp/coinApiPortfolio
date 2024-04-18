@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.portfolio.coinapi.client.CoinGeckoClient;
-import com.portfolio.coinapi.config.enums.CoinsID;
+import com.portfolio.coinapi.model.enums.CoinsID;
 import com.portfolio.coinapi.model.Coin;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;

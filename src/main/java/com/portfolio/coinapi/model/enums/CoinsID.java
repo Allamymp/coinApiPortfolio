@@ -1,4 +1,4 @@
-package com.portfolio.coinapi.config.enums;
+package com.portfolio.coinapi.model.enums;
 
 
 import lombok.Getter;
