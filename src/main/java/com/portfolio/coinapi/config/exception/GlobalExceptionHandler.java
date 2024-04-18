@@ -27,10 +27,10 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
-    @ExceptionHandler(DuplicateUsernameException.class)
+    @ExceptionHandler(DuplicatedUsernameException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ResponseEntity<String> handleDuplicateUsernameException(DuplicateUsernameException ex) {
+    public ResponseEntity<String> handleDuplicateUsernameException(DuplicatedUsernameException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ex.getMessage());
     }
