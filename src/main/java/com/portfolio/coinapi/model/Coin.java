@@ -23,7 +23,7 @@ import java.util.Set;
 public class Coin {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotBlank
     @Column(unique = true)

@@ -21,13 +21,13 @@ import java.util.Set;
 public class Wallet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @OneToOne
     @JoinColumn(name = "client_id", referencedColumnName = "id")
     @JsonBackReference
     private Client client;
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "wallet_coin",
             joinColumns = @JoinColumn(name = "wallet_id", referencedColumnName = "id"),

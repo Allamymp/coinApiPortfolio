@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.portfolio.coinapi.client.CoinGeckoClient;
 import com.portfolio.coinapi.model.enums.CoinsID;
 import com.portfolio.coinapi.model.Coin;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,7 @@ public class CoinGeckoService {
 
     private final CoinGeckoClient coinGeckoClient;
     private final ObjectMapper objectMapper;
+    private static final Logger coinGeckoServiceLogger = LogManager.getLogger(CoinGeckoService.class);
 
     public CoinGeckoService(CoinGeckoClient coinGeckoClient, ObjectMapper objectMapper) {
         this.coinGeckoClient = coinGeckoClient;
@@ -31,24 +34,28 @@ public class CoinGeckoService {
     }
 
     public Boolean checkPingStatus() {
+        coinGeckoServiceLogger.info("Checking CoinGecko ping status.");
         ResponseEntity<?> responseEntity = coinGeckoClient.ping();
-
-        return responseEntity.getStatusCode() == HttpStatus.OK;
+        boolean isOk = responseEntity.getStatusCode() == HttpStatus.OK;
+        coinGeckoServiceLogger.info("Ping status received: " + (isOk ? "OK" : "NOT OK"));
+        return isOk;
     }
 
     @Cacheable("coins")
-    public List<Coin> fetchCoinDetails(){
+    public List<Coin> fetchCoinDetails() {
+        coinGeckoServiceLogger.info("Fetching coin details from CoinGecko.");
         ResponseEntity<String> response = coinGeckoClient
                 .getCoinsDetailsRaw(
                         getAllCoinIdsAsString()
-                        ,"usd"
-                        ,true
-                        ,true
-                        ,true);
-        JsonNode root = null;
+                        , "usd"
+                        , true
+                        , true
+                        , true);
+        JsonNode root;
         try {
             root = objectMapper.readTree(response.getBody());
         } catch (JsonProcessingException e) {
+            coinGeckoServiceLogger.error("Error processing JSON from CoinGecko: " + response.getBody(), e);
             throw new RuntimeException(e);
         }
         List<Coin> listCoins = new ArrayList<>();
@@ -65,10 +72,13 @@ public class CoinGeckoService {
             );
             listCoins.add(coin);
         }
+        coinGeckoServiceLogger.info("Received and processed coin details for " + listCoins.size() + " coins.");
         return listCoins;
     }
 
     public static String getAllCoinIdsAsString() {
+        coinGeckoServiceLogger.info("CoinGeckoService: calling  getAllCoinIdsAsString.");
+
         return Arrays.stream(CoinsID.values())
                 .map(CoinsID::getId)
                 .collect(Collectors.joining(","));
