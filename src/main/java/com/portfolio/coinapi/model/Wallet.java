@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Entity(name="TB_WALLET")
+@Entity(name = "TB_WALLET")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -35,12 +35,16 @@ public class Wallet {
     )
     private Set<Coin> coinList = new HashSet<>();
 
+    public Wallet(Client client) {
+        this.client = client;
+    }
+
     public void addCoin(Coin coin) {
         this.coinList.add(coin);
         coin.getWallets().add(this);
     }
 
-    public void removeCoin(Coin coin){
+    public void removeCoin(Coin coin) {
         coinList.remove(coin);
     }
 }
