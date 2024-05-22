@@ -19,7 +19,6 @@ public class ClientConstants {
             add(new Client("firstClient", "firstClientPassword", new Wallet()));
             add(new Client("secondClient", "secondClientPassword", new Wallet()));
             add(new Client("thirdClient", "thirdClientPassword", new Wallet()));
-
         }
     };
 
