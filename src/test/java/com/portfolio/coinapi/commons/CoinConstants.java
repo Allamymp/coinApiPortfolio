@@ -13,4 +13,6 @@ public class CoinConstants {
             new BigDecimal("1.5"),
             Instant.now());
 
+    public static final Coin INVALID_COIN = new Coin();
+
 }

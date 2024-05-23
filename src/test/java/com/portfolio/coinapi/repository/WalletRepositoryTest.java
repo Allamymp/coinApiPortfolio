@@ -48,4 +48,13 @@ public class WalletRepositoryTest {
         assertThat(sut).isNotNull();
         assertThat(sut.get().getClient().getUsername()).isEqualTo(WALLET.getClient().getUsername());
     }
+
+    @Test
+    public void getWallet_byUnexistingId_returnsNotFound() {
+        Optional<Wallet> sut = walletRepository.findById(1L);
+        assertThat(sut).isEmpty();
+    }
+
+
+
 }
