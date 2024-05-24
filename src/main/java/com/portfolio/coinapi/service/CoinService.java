@@ -3,7 +3,6 @@ package com.portfolio.coinapi.service;
 import com.portfolio.coinapi.model.Coin;
 import com.portfolio.coinapi.repository.CoinRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,11 +14,12 @@ import java.util.List;
 public class CoinService {
 
     private final CoinRepository coinRepository;
-    private static final Logger coinServiceLogger = LogManager.getLogger(CoinService.class);
+    private  final Logger coinServiceLogger;
 
 
-    public CoinService(CoinRepository coinRepository) {
+    public CoinService(CoinRepository coinRepository, Logger logger) {
         this.coinRepository = coinRepository;
+        this.coinServiceLogger = logger;
     }
 
 
@@ -27,6 +27,7 @@ public class CoinService {
         coinServiceLogger.info("CoinService: verifying if coin is not null");
         if (coin == null) {
             coinServiceLogger.error("Attempted to create a null coin object.");
+            coinServiceLogger.error("Coin object cannot be null");
             throw new IllegalArgumentException("Coin object cannot be null");
         }
         coinServiceLogger.info("Creating coin with name: " + coin.getName());

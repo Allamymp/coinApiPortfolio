@@ -5,25 +5,23 @@ import com.portfolio.coinapi.model.Wallet;
 import com.portfolio.coinapi.repository.CoinRepository;
 import com.portfolio.coinapi.repository.WalletRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class WalletService {
 
     private final WalletRepository walletRepository;
     private final CoinRepository coinRepository;
-    private final static Logger WalletServiceLogger = LogManager.getLogger(WalletService.class);
+    private final Logger WalletServiceLogger;
 
     public WalletService(WalletRepository walletRepository,
-                         CoinRepository coinRepository) {
+                         CoinRepository coinRepository, Logger walletServiceLogger) {
         this.walletRepository = walletRepository;
         this.coinRepository = coinRepository;
+        WalletServiceLogger = walletServiceLogger;
     }
 
     public Wallet create(Wallet wallet) {
@@ -36,14 +34,14 @@ public class WalletService {
     }
 
 
-    public List<Coin> listCoinsByWalletId(Long walletId) {
+    public Set<Coin> listCoinsByWalletId(Long walletId) {
         WalletServiceLogger.info("Retrieving coins for wallet ID: " + walletId);
         Wallet wallet = walletRepository.findById(walletId)
                 .orElseThrow(() -> {
                     WalletServiceLogger.error("Wallet not found for ID: " + walletId);
                     return new EntityNotFoundException("Wallet not found for id: " + walletId);
                 });
-        List<Coin> coins = new ArrayList<>(wallet.getCoinList());
+        Set<Coin> coins = new HashSet<>(wallet.getCoinList());
         WalletServiceLogger.info("Number of coins retrieved for wallet ID " + walletId + ": " + coins.size());
         return coins;
     }
@@ -89,4 +87,6 @@ public class WalletService {
         WalletServiceLogger.info("Added coin ID: " + coinId + " to wallet ID: " + walletId);
         return savedWallet;
     }
+
+
 }

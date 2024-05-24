@@ -1,6 +1,7 @@
 package com.portfolio.coinapi.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -37,7 +38,7 @@ public class Coin {
     @NotNull
     private Instant lastUpdate;
     @ManyToMany(mappedBy = "coinList")
-    @JsonManagedReference
+    @JsonIgnore
     private Set<Wallet> wallets = new HashSet<>();
 
     public Coin(String name, BigDecimal price, BigDecimal marketValue, BigDecimal last24hChange, Instant lastUpdate ) {

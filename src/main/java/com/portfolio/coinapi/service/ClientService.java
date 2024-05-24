@@ -6,7 +6,6 @@ import com.portfolio.coinapi.model.Client;
 import com.portfolio.coinapi.model.Wallet;
 import com.portfolio.coinapi.repository.ClientRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,28 +18,30 @@ public class ClientService {
     private final ClientRepository clientRepository;
     private final WalletService walletService;
 
-    private static final Logger clientServiceLogger = LogManager.getLogger(ClientService.class);
+    private final Logger clientServiceLogger;
 
-    public ClientService(ClientRepository clientRepository, WalletService walletService) {
+    public ClientService(ClientRepository clientRepository, WalletService walletService, Logger clientServiceLogger) {
         this.clientRepository = clientRepository;
         this.walletService = walletService;
+        this.clientServiceLogger = clientServiceLogger;
     }
 
     @Transactional
-    public Client create(Client client) {
-        String username = client.getUsername();
+    public Client create(Client data) {
+        String username = data.getUsername();
         if (clientRepository.existsByUsername(username)) {
-            clientServiceLogger.info("ClientService: Verifying if user with id "
-                    + username + " already exists in database.");
+            clientServiceLogger.info("ClientService: Verifying if user with username " + username + " already exists in database.");
             throw new DuplicatedUsernameException("Username already exists: " + username);
         }
         clientServiceLogger.info("Creating new client with username: " + username);
-        return clientRepository.save(new Client(
-                client.getUsername(),
-                client.getPassword(),
-                walletService.create(new Wallet())));
-    }
 
+        Wallet wallet = new Wallet();
+        Client client = clientRepository.save(data);
+        wallet.setClient(client);
+        client.setWallet(walletService.create(wallet));
+
+        return clientRepository.save(client);
+    }
 
     public Client findById(Long id) {
         clientServiceLogger.info("Searching for client with ID: " + id);

@@ -4,7 +4,7 @@ package com.portfolio.coinapi.controller;
 import com.portfolio.coinapi.model.Client;
 import com.portfolio.coinapi.service.ClientService;
 import jakarta.validation.Valid;
-import org.apache.logging.log4j.LogManager;
+
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,10 +19,11 @@ import org.springframework.web.bind.annotation.*;
 public class ClientController {
 
     private final ClientService clientService;
-    private static final Logger clientControllerLogger = LogManager.getLogger(ClientController.class);
+    private final Logger clientControllerLogger;
 
-    public ClientController(ClientService clientService) {
+    public ClientController(ClientService clientService, Logger clientControllerLogger) {
         this.clientService = clientService;
+        this.clientControllerLogger = clientControllerLogger;
     }
 
 
@@ -59,8 +60,6 @@ public class ClientController {
             return ResponseEntity.notFound().build();
         }
     }
-
-
     @GetMapping("/all")
     public ResponseEntity<Page<Client>> findAll(@PageableDefault(sort = {"username"}) Pageable pageable) {
         clientControllerLogger.info("Received request to fetch all clients");

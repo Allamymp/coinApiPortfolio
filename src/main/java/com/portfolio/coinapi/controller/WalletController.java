@@ -4,33 +4,34 @@ import com.portfolio.coinapi.model.Coin;
 import com.portfolio.coinapi.model.Wallet;
 import com.portfolio.coinapi.service.WalletService;
 import jakarta.validation.Valid;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/wallet")
 public class WalletController {
 
     private final WalletService walletService;
-    private static final Logger walletControllerLogger = LogManager.getLogger(WalletController.class);
+    private final Logger walletControllerLogger;
 
-    public WalletController(WalletService walletService) {
+    public WalletController(WalletService walletService, Logger walletControllerLogger) {
         this.walletService = walletService;
+        this.walletControllerLogger = walletControllerLogger;
     }
 
 
     @GetMapping("/{walletId}")
-    public ResponseEntity<List<Coin>> listAllCoins(@Valid @PathVariable Long walletId) {
+    public ResponseEntity<Set<Coin>> listAllCoins(@Valid @PathVariable Long walletId) {
         walletControllerLogger.info("Received request to list all coins in wallet with id: {}", walletId);
-        List<Coin> coins = walletService.listCoinsByWalletId(walletId);
+        Set<Coin> coins = walletService.listCoinsByWalletId(walletId);
         walletControllerLogger.info("Found {} coins in wallet with id: {}", coins.size(), walletId);
         return ResponseEntity.status(HttpStatus.OK).body(coins);
     }
+
 
     @DeleteMapping("/{walletId}/coins/{coinId}")
     public ResponseEntity<?> removeCoin(@Valid @PathVariable Long walletId, @PathVariable Long coinId) {

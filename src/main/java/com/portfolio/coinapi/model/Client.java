@@ -28,7 +28,6 @@ public class Client {
     private String password;
     @OneToOne(mappedBy = "client", cascade = CascadeType.ALL)
     @JsonManagedReference
-    @NotNull
     private Wallet wallet;
 
     public Client(String username, String password, Wallet wallet) {

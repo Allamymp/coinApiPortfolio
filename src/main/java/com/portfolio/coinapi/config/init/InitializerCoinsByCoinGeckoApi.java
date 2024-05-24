@@ -42,7 +42,7 @@ public class InitializerCoinsByCoinGeckoApi {
 
     @Scheduled(fixedDelay = 553000) // 553 seconds
     @CacheEvict(value = "coins", allEntries = true)
-    public void updateCoins() throws InterruptedException {
+    public void updateCoins() {
         try {
             logger.info("Updating coin data...");
             List<Coin> coinList = coinGeckoService.fetchCoinDetails();
