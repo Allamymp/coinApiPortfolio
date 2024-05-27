@@ -46,7 +46,7 @@ public class ClientControllerTest {
         verify(clientControllerLogger).info(eq("Received request to create client: {}"), clientCaptor.capture());
 
         Client sut = clientCaptor.getValue();
-        assertEquals(CLIENT.getUsername(), sut.getUsername());
+        assertEquals(CLIENT.getEmail(), sut.getEmail());
         assertEquals(CLIENT.getPassword(), sut.getPassword());
         assertNotNull(sut.getWallet());
     }

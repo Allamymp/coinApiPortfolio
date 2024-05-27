@@ -35,7 +35,7 @@ public class WalletRepositoryTest {
         Wallet sut = testEntityManager.find(Wallet.class, wallet.getId());
 
         assertThat(sut).isNotNull();
-        assertThat(sut.getClient().getUsername()).isEqualTo(WALLET.getClient().getUsername());
+        assertThat(sut.getClient().getEmail()).isEqualTo(WALLET.getClient().getEmail());
         assertThat(sut.getId()).isEqualTo(wallet.getId());
     }
 
@@ -46,7 +46,7 @@ public class WalletRepositoryTest {
 
         assertThat(sut).isNotEmpty();
         assertThat(sut).isNotNull();
-        assertThat(sut.get().getClient().getUsername()).isEqualTo(WALLET.getClient().getUsername());
+        assertThat(sut.get().getClient().getEmail()).isEqualTo(WALLET.getClient().getEmail());
     }
 
     @Test

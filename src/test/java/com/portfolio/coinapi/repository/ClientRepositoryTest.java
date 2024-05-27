@@ -39,7 +39,7 @@ public class ClientRepositoryTest {
         Client sut = testEntityManager.find(Client.class, client.getId());
 
         assertThat(sut).isNotNull();
-        assertThat(sut.getUsername()).isEqualTo(CLIENT.getUsername());
+        assertThat(sut.getEmail()).isEqualTo(CLIENT.getEmail());
         assertThat(sut.getPassword()).isEqualTo(CLIENT.getPassword());
     }
 
@@ -56,15 +56,15 @@ public class ClientRepositoryTest {
     @Test
     public void getClient_byExistingName_returnsClient() {
         Client client = clientRepository.save(CLIENT);
-        Optional<Client> sut = clientRepository.findByUsername(CLIENT.getUsername());
+        Optional<Client> sut = clientRepository.findByUsername(CLIENT.getEmail());
         assertThat(sut).isPresent();
-        assertThat(sut.get().getUsername()).isEqualTo(client.getUsername());
+        assertThat(sut.get().getEmail()).isEqualTo(client.getEmail());
         assertThat(sut.get().getPassword()).isEqualTo(client.getPassword());
     }
 
     @Test
     public void getClient_byUnexistingName_returnsEmpty() {
-        Optional<Client> sut = clientRepository.findByUsername(CLIENT.getUsername());
+        Optional<Client> sut = clientRepository.findByUsername(CLIENT.getEmail());
         assertThat(sut).isEmpty();
     }
 
@@ -77,7 +77,7 @@ public class ClientRepositoryTest {
         assertThat(sut).isNotNull();
         assertThat(sut).isNotEmpty();
         assertThat(sut.get().getId()).isEqualTo(client.getId());
-        assertThat(sut.get().getUsername()).isEqualTo(client.getUsername());
+        assertThat(sut.get().getEmail()).isEqualTo(client.getEmail());
         assertThat(sut.get().getPassword()).isEqualTo(client.getPassword());
     }
 
@@ -99,8 +99,8 @@ public class ClientRepositoryTest {
         List<Client> sut = clientRepository.findAll();
 
         assertThat(sut).hasSize(3);
-        assertThat(sut.getFirst().getUsername()).isEqualTo("firstClient");
-        assertThat(sut.getLast().getUsername()).isEqualTo("thirdClient");
+        assertThat(sut.getFirst().getEmail()).isEqualTo("firstClient");
+        assertThat(sut.getLast().getEmail()).isEqualTo("thirdClient");
     }
 
     @Test

@@ -54,7 +54,7 @@ class ClientServiceTest {
     void createClient_withValidData_returnsClient() {
         // Arrange
 
-        when(clientRepository.existsByUsername(CLIENT.getUsername())).thenReturn(false);
+        when(clientRepository.existsByUsername(CLIENT.getEmail())).thenReturn(false);
         when(walletService.create(any(Wallet.class))).thenReturn(WALLET);
         when(clientRepository.save(any(Client.class))).thenReturn(CLIENT);
 
@@ -63,21 +63,21 @@ class ClientServiceTest {
 
         // Assert
         assertNotNull(createdClient);
-        assertEquals(CLIENT.getUsername(), createdClient.getUsername());
+        assertEquals(CLIENT.getEmail(), createdClient.getEmail());
         assertEquals(CLIENT.getPassword(), createdClient.getPassword());
         assertNotNull(createdClient.getWallet());
-        verify(clientRepository, times(1)).existsByUsername(CLIENT.getUsername());
+        verify(clientRepository, times(1)).existsByUsername(CLIENT.getEmail());
         verify(clientRepository, times(1)).save(any(Client.class));
     }
 
     @Test
     void testCreateClient_DuplicatedUsernameException() {
-        when(clientRepository.existsByUsername(CLIENT.getUsername())).thenReturn(true);
+        when(clientRepository.existsByUsername(CLIENT.getEmail())).thenReturn(true);
 
         // Act & Assert
         assertThrows(DuplicatedUsernameException.class, () -> clientService.create(CLIENT));
 
-        verify(clientRepository, times(1)).existsByUsername(CLIENT.getUsername());
+        verify(clientRepository, times(1)).existsByUsername(CLIENT.getEmail());
         verify(clientRepository, times(0)).save(any(Client.class));
     }
 
@@ -90,7 +90,7 @@ class ClientServiceTest {
         when(clientRepository.findById(validId)).thenReturn(Optional.of(expectedClient));
 
         // Act
-        Client sut = clientService.findById(validId);
+        Client sut = clientService.findById(validId).getBody();
 
         // Assert
         assertThat(sut).isEqualTo(expectedClient);
@@ -111,11 +111,11 @@ class ClientServiceTest {
     @Test
     void findByName_withValidName_returnsClient() {
         //Arrange
-        String validName = CLIENT.getUsername();
+        String validName = CLIENT.getEmail();
         when(clientRepository.findByUsername(validName)).thenReturn(Optional.of(CLIENT));
 
         //Act
-        Client sut = clientService.findByUsername(validName);
+        Client sut = clientService.findByUsername(validName).getBody();
 
         //Assert
         assertThat(sut).isNotNull();
@@ -174,12 +174,12 @@ class ClientServiceTest {
         // Arrange
         Client existingClient = new Client();
         existingClient.setId(1L);
-        existingClient.setUsername("oldUsername");
+        existingClient.setEmail("oldUsername");
         existingClient.setPassword("oldPassword");
 
         Client updatedClient = new Client();
         updatedClient.setId(1L);
-        updatedClient.setUsername("newUsername");
+        updatedClient.setEmail("newUsername");
         updatedClient.setPassword("newPassword");
 
         when(clientRepository.findById(1L)).thenReturn(Optional.of(existingClient));
@@ -188,7 +188,7 @@ class ClientServiceTest {
         clientService.update(updatedClient);
 
         // Assert
-        assertThat(existingClient.getUsername()).isEqualTo("newUsername");
+        assertThat(existingClient.getEmail()).isEqualTo("newUsername");
         assertThat(existingClient.getPassword()).isEqualTo("newPassword");
         verify(clientRepository).save(existingClient);
 
@@ -223,7 +223,7 @@ class ClientServiceTest {
         clientService.update(updatedClient);
 
         // Assert
-        assertThat(existingClient.getUsername()).isEqualTo(CLIENT.getUsername());
+        assertThat(existingClient.getEmail()).isEqualTo(CLIENT.getEmail());
         assertThat(existingClient.getPassword()).isEqualTo(CLIENT.getPassword());
         verify(clientRepository).save(existingClient);
         verify(clientServiceLogger, never()).info("Username updated for client with ID: 1");
@@ -245,7 +245,7 @@ class ClientServiceTest {
         clientService.update(updatedClient);
 
         // Assert
-        assertThat(existingClient.getUsername()).isEqualTo(CLIENT.getUsername());
+        assertThat(existingClient.getEmail()).isEqualTo(CLIENT.getEmail());
         assertThat(existingClient.getPassword()).isEqualTo("newPassword");
         verify(clientRepository).save(existingClient);
 
