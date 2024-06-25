@@ -2,6 +2,7 @@ package com.portfolio.coinapi.controller;
 
 import com.portfolio.coinapi.model.Client;
 import com.portfolio.coinapi.service.ClientService;
+import com.portfolio.coinapi.service.EmailService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,29 +14,31 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/client")
+@RequestMapping("/v1/clients")
 @CrossOrigin("*")
 public class ClientController {
 
     private final ClientService clientService;
+    private final EmailService emailService;
 
-    public ClientController(ClientService clientService) {
+    public ClientController(ClientService clientService, EmailService emailService) {
         this.clientService = clientService;
+        this.emailService = emailService;
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<Void> create(@Valid @RequestBody Client client) {
         URI location = clientService.create(client);
         return ResponseEntity.created(location).build();
     }
 
-    @GetMapping("/findById")
-    public ResponseEntity<Client> findById(@Valid @RequestParam Long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<Client> findById(@Valid @PathVariable Long id) {
         return clientService.findById(id);
     }
 
-    @GetMapping("/findByUsername")
-    public ResponseEntity<Client> findByUsername(@Valid @RequestParam String username) {
+    @GetMapping("/username")
+    public ResponseEntity<Client> findByUsername(@RequestParam String username) {
         return clientService.findByUsername(username);
     }
 
@@ -44,15 +47,34 @@ public class ClientController {
         return ResponseEntity.ok().body(clientService.allClients(pageable));
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<?> update(@Valid @RequestBody Client client) {
+    @PutMapping
+    public ResponseEntity<Void> update(@Valid @RequestBody Client client) {
         clientService.updateClient(client);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@Valid @PathVariable Long id) {
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         clientService.deleteById(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/reset/{token}")
+    public ResponseEntity<?> resetPassword(@PathVariable String token) {
+        String[] info = clientService.resetPassword(token);
+        if (info != null) {
+            emailService.sendResetPasswordConfirmation(info[0], info[1]);
+            return ResponseEntity.ok().body("New password send to email!");
+        } else {
+            return ResponseEntity.badRequest().body("Invalid or expired token. Please request a new password reset link.");
+
+        }
+    }
+
+    @GetMapping("/forgetPassword")
+    public ResponseEntity<?> forgetPassword(@RequestParam String email) {
+        clientService.forgetPassword(email);
+        return ResponseEntity.ok().body("Password instructions sent to your email.");
     }
 }

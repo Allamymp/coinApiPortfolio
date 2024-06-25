@@ -9,13 +9,13 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
 @Table(name = "TB_CLIENT")
 public class Client {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,13 +27,18 @@ public class Client {
     private String email;
 
     @NotBlank(message = "Password is mandatory")
-    @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
+    @Size(min = 8, max = 12, message = "Password must be between 8 and 12 characters")
     @NotNull
     private String password;
 
     @OneToOne(mappedBy = "client", cascade = CascadeType.ALL)
     @JsonManagedReference
     private Wallet wallet;
+
+    private boolean enabled;
+
+    @NotBlank
+    private String uniqueToken;
 
     public Client(String email, String password, Wallet wallet) {
         this.email = email;

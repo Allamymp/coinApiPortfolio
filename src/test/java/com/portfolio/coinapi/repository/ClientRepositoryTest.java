@@ -56,7 +56,7 @@ public class ClientRepositoryTest {
     @Test
     public void getClient_byExistingName_returnsClient() {
         Client client = clientRepository.save(CLIENT);
-        Optional<Client> sut = clientRepository.findByUsername(CLIENT.getEmail());
+        Optional<Client> sut = clientRepository.findByEmail(CLIENT.getEmail());
         assertThat(sut).isPresent();
         assertThat(sut.get().getEmail()).isEqualTo(client.getEmail());
         assertThat(sut.get().getPassword()).isEqualTo(client.getPassword());
@@ -64,7 +64,7 @@ public class ClientRepositoryTest {
 
     @Test
     public void getClient_byUnexistingName_returnsEmpty() {
-        Optional<Client> sut = clientRepository.findByUsername(CLIENT.getEmail());
+        Optional<Client> sut = clientRepository.findByEmail(CLIENT.getEmail());
         assertThat(sut).isEmpty();
     }
 

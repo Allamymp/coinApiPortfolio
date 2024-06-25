@@ -2,7 +2,6 @@ package com.portfolio.coinapi.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,7 +14,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
-
 @Entity(name = "TB_COIN")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,17 +24,23 @@ public class Coin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @NotBlank
     @Column(unique = true)
     private String name;
+
     @NotNull
     private BigDecimal price;
+
     @NotNull
     private BigDecimal marketValue;
+
     @NotNull
     private BigDecimal last24hChange;
+
     @NotNull
     private Instant lastUpdate;
+
     @ManyToMany(mappedBy = "coinList")
     @JsonIgnore
     private Set<Wallet> wallets = new HashSet<>();

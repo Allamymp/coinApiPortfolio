@@ -7,6 +7,7 @@ import com.portfolio.coinapi.repository.WalletRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -24,6 +25,7 @@ public class WalletService {
         WalletServiceLogger = walletServiceLogger;
     }
 
+    @Transactional
     public Wallet create(Wallet wallet) {
         if (wallet == null) {
             WalletServiceLogger.error("Failed to create wallet: wallet object is null.");
@@ -33,7 +35,7 @@ public class WalletService {
         return walletRepository.save(wallet);
     }
 
-
+    @Transactional(readOnly = true)
     public Set<Coin> listCoinsByWalletId(Long walletId) {
         WalletServiceLogger.info("Retrieving coins for wallet ID: " + walletId);
         Wallet wallet = walletRepository.findById(walletId)
@@ -46,6 +48,7 @@ public class WalletService {
         return coins;
     }
 
+    @Transactional
     public void removeCoin(Long walletId, Long coinId) {
         WalletServiceLogger.info("Attempting to remove coin ID: " + coinId + " from wallet ID: " + walletId);
         Wallet wallet = walletRepository.findById(walletId).orElseThrow(() -> {
@@ -64,6 +67,7 @@ public class WalletService {
         WalletServiceLogger.info("Removed coin ID: " + coinId + " from wallet ID: " + walletId);
     }
 
+    @Transactional
     public Wallet addCoin(Long walletId, Long coinId) {
         WalletServiceLogger.info("Adding coin ID: " + coinId + " to wallet ID: " + walletId);
         Wallet wallet = walletRepository.findById(walletId)

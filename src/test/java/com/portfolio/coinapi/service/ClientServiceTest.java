@@ -54,7 +54,7 @@ class ClientServiceTest {
     void createClient_withValidData_returnsClient() {
         // Arrange
 
-        when(clientRepository.existsByUsername(CLIENT.getEmail())).thenReturn(false);
+        when(clientRepository.existsByEmail(CLIENT.getEmail())).thenReturn(false);
         when(walletService.create(any(Wallet.class))).thenReturn(WALLET);
         when(clientRepository.save(any(Client.class))).thenReturn(CLIENT);
 
@@ -66,18 +66,18 @@ class ClientServiceTest {
         assertEquals(CLIENT.getEmail(), createdClient.getEmail());
         assertEquals(CLIENT.getPassword(), createdClient.getPassword());
         assertNotNull(createdClient.getWallet());
-        verify(clientRepository, times(1)).existsByUsername(CLIENT.getEmail());
+        verify(clientRepository, times(1)).existsByEmail(CLIENT.getEmail());
         verify(clientRepository, times(1)).save(any(Client.class));
     }
 
     @Test
     void testCreateClient_DuplicatedUsernameException() {
-        when(clientRepository.existsByUsername(CLIENT.getEmail())).thenReturn(true);
+        when(clientRepository.existsByEmail(CLIENT.getEmail())).thenReturn(true);
 
         // Act & Assert
         assertThrows(DuplicatedUsernameException.class, () -> clientService.create(CLIENT));
 
-        verify(clientRepository, times(1)).existsByUsername(CLIENT.getEmail());
+        verify(clientRepository, times(1)).existsByEmail(CLIENT.getEmail());
         verify(clientRepository, times(0)).save(any(Client.class));
     }
 
@@ -112,7 +112,7 @@ class ClientServiceTest {
     void findByName_withValidName_returnsClient() {
         //Arrange
         String validName = CLIENT.getEmail();
-        when(clientRepository.findByUsername(validName)).thenReturn(Optional.of(CLIENT));
+        when(clientRepository.findByEmail(validName)).thenReturn(Optional.of(CLIENT));
 
         //Act
         Client sut = clientService.findByUsername(validName).getBody();
@@ -127,7 +127,7 @@ class ClientServiceTest {
     void findByName_withInvalidName_throwsException() {
         //Arrange
         String invalidName = "invalid_name";
-        when(clientRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(clientRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
         //Act & Assert
         assertThatThrownBy(() -> clientService.findByUsername(invalidName)).isInstanceOf(EntityNotFoundException.class);

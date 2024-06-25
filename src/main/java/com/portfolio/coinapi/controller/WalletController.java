@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/wallet")
+@RequestMapping("/V1-wallet")
 public class WalletController {
 
     private final WalletService walletService;
