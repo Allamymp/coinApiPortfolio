@@ -30,18 +30,10 @@ public class RedisLogger {
 
         // Tambem exibir log no console
         switch (level.toLowerCase()) {
-            case "info":
-                logger.info(logMessage);
-                break;
-            case "warn":
-                logger.warn(logMessage);
-                break;
-            case "error":
-                logger.error(logMessage);
-                break;
-            default:
-                logger.debug(logMessage);
-                break;
+            case "info" -> logger.info(logMessage);
+            case "warn" -> logger.warn(logMessage);
+            case "error" -> logger.error(logMessage);
+            default -> logger.debug(logMessage);
         }
     }
 }

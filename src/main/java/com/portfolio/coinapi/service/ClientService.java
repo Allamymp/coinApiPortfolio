@@ -162,8 +162,7 @@ public class ClientService {
         if (password.length() < 8 || password.length() > 12) {
             return false;
         }
-        // Verifica se a senha contém pelo menos uma letra maiúscula, uma minúscula e um
-        // caractere especial
+        // verficia se senha corresponde parametros
         Pattern upperCase = Pattern.compile("[A-Z]");
         Pattern lowerCase = Pattern.compile("[a-z]");
         Pattern specialChar = Pattern.compile("[!@#$%^&*()-_+=<>?/{}\\[\\]]");

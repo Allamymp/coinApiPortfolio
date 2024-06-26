@@ -1,6 +1,7 @@
 package com.portfolio.coinapi.config.exception;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.Getter;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,79 +13,108 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
-    public ResponseEntity<String> handleException(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+        logger.error("Unhandled exception: ", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("An internal server error occurred. Please try again later.");
+                .body(new ErrorResponse("An internal server error occurred. Please try again later."));
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
-    public ResponseEntity<String> handleNoSuchElementException(EntityNotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleNoSuchElementException(EntityNotFoundException ex) {
+        logger.warn("Entity not found: ", ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ex.getMessage());
+                .body(new ErrorResponse(ex.getMessage()));
     }
 
     @ExceptionHandler(DuplicatedUsernameException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ResponseEntity<String> handleDuplicateUsernameException(DuplicatedUsernameException ex) {
+    public ResponseEntity<ErrorResponse> handleDuplicateUsernameException(DuplicatedUsernameException ex) {
+        logger.warn("Duplicated username: ", ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ex.getMessage());
+                .body(new ErrorResponse(ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        logger.warn("Validation exception: ", ex);
         BindingResult result = ex.getBindingResult();
         Map<String, String> errors = result.getFieldErrors().stream()
-                .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
+                .collect(Collectors.toMap(FieldError::getField,
+                        fieldError -> {
+                            String defaultMessage = fieldError.getDefaultMessage();
+                            return defaultMessage != null ? defaultMessage : "Invalid value";
+                        }));
         return ResponseEntity.badRequest().body(errors);
     }
 
-
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException ex) {
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
+        logger.warn("Illegal argument: ", ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("Invalid request. " + ex.getMessage());
+                .body(new ErrorResponse("Invalid request. " + ex.getMessage()));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        logger.error("Data integrity violation: ", ex);
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body("Data conflict: " + ex.getMessage());
+                .body(new ErrorResponse("Data conflict. Please check your input and try again."));
     }
 
     @ExceptionHandler(TransactionSystemException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<?> handleTransactionSystemException(TransactionSystemException ex) {
+    public ResponseEntity<ErrorResponse> handleTransactionSystemException(TransactionSystemException ex) {
+        logger.error("Transaction system exception: ", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Transaction system exception: " + ex.getMessage());
+                .body(new ErrorResponse("Transaction system error. Please try again later."));
     }
 
     @ExceptionHandler(MailSendingException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<?> handleMailSendingException(MailSendingException ex) {
+    public ResponseEntity<ErrorResponse> handleMailSendingException(MailSendingException ex) {
+        logger.error("Mail sending exception: ", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Failed to send email: " + ex.getMessage());
+                .body(new ErrorResponse("Failed to send email. Please try again later."));
     }
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<?> handleRuntimeException(RuntimeException ex) {
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
+        logger.error("Runtime exception: ", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Runtime exception: " + ex.getMessage());
+                .body(new ErrorResponse("An unexpected error occurred. Please try again later."));
+    }
+
+    // Classe para estruturar as respostas de erro
+    @Getter
+    public static class ErrorResponse {
+        private String message;
+
+        public ErrorResponse(String message) {
+            this.message = message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
     }
 }

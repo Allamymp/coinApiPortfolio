@@ -1,9 +1,9 @@
 package com.portfolio.coinapi.service;
 
+import com.portfolio.coinapi.config.log.RedisLogger;
 import com.portfolio.coinapi.model.Coin;
 import com.portfolio.coinapi.repository.CoinRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,71 +13,90 @@ import java.util.List;
 @Transactional
 public class CoinService {
 
+    private static final String COIN_NULL_ERROR = "Coin object cannot be null";
+    private static final String COIN_NOT_FOUND_ERROR = "Coin not found for name: ";
+
     private final CoinRepository coinRepository;
-    private  final Logger coinServiceLogger;
+    private final RedisLogger logger;
 
-
-    public CoinService(CoinRepository coinRepository, Logger logger) {
+    public CoinService(CoinRepository coinRepository, RedisLogger logger) {
         this.coinRepository = coinRepository;
-        this.coinServiceLogger = logger;
+        this.logger = logger;
     }
 
 
     public void createCoin(Coin coin) {
-        coinServiceLogger.info("CoinService: verifying if coin is not null");
-        if (coin == null) {
-            coinServiceLogger.error("Attempted to create a null coin object.");
-            coinServiceLogger.error("Coin object cannot be null");
-            throw new IllegalArgumentException("Coin object cannot be null");
-        }
-        coinServiceLogger.info("Creating coin with name: " + coin.getName());
+        validateCoin(coin);
+        logger.log("info", "Creating coin with name: " + coin.getName());
         coinRepository.save(coin);
-        coinServiceLogger.info("Coin successfully created: " + coin.getName());
+        logger.log("info", "Coin successfully created: " + coin.getName());
     }
 
+
     public void updateCoin(Coin toSaveCoin) {
-        if (toSaveCoin == null) {
-            coinServiceLogger.error("Attempted to update a null coin object.");
-            throw new IllegalArgumentException("Coin object cannot be null");
-        }
+        validateCoin(toSaveCoin);
         Coin savedCoin = coinRepository.findByName(toSaveCoin.getName())
-                .orElseThrow(() -> new EntityNotFoundException("Coin not found for name: " + toSaveCoin.getName()));
-        coinServiceLogger.info("Updating coin: " + toSaveCoin.getName());
+                .orElseThrow(() -> {
+                    logger.log("warn", COIN_NOT_FOUND_ERROR + toSaveCoin.getName());
+                    return new EntityNotFoundException(COIN_NOT_FOUND_ERROR + toSaveCoin.getName());
+                });
+
+        logger.log("info", "Updating coin: " + toSaveCoin.getName());
         boolean updateRequired = false;
 
-        if (savedCoin.getPrice() == null || savedCoin.getPrice().compareTo(toSaveCoin.getPrice()) != 0) {
-            coinServiceLogger.debug("Updating price for coin: " + savedCoin.getName());
+        if (isDifferent(savedCoin.getPrice(), toSaveCoin.getPrice())) {
+            logger.log("info", "Updating price for coin: " + savedCoin.getName());
             savedCoin.setPrice(toSaveCoin.getPrice());
             updateRequired = true;
         }
-        if (savedCoin.getLastUpdate() == null || savedCoin.getLastUpdate().isBefore(toSaveCoin.getLastUpdate())) {
-            coinServiceLogger.debug("Updating LastUpdate for coin: " + savedCoin.getName());
+        if (isDifferent(savedCoin.getLastUpdate(), toSaveCoin.getLastUpdate())) {
+            logger.log("info", "Updating LastUpdate for coin: " + savedCoin.getName());
             savedCoin.setLastUpdate(toSaveCoin.getLastUpdate());
             updateRequired = true;
         }
-        if (savedCoin.getLast24hChange() == null || savedCoin.getLast24hChange().compareTo(toSaveCoin.getLast24hChange()) != 0) {
-            coinServiceLogger.debug("Updating last 24h change for coin: " + savedCoin.getName());
+        if (isDifferent(savedCoin.getLast24hChange(), toSaveCoin.getLast24hChange())) {
+            logger.log("info", "Updating last 24h change for coin: " + savedCoin.getName());
             savedCoin.setLast24hChange(toSaveCoin.getLast24hChange());
             updateRequired = true;
         }
-        if (savedCoin.getMarketValue() == null || savedCoin.getMarketValue().compareTo(toSaveCoin.getMarketValue()) != 0) {
-            coinServiceLogger.debug("Updating market value for coin: " + savedCoin.getName());
+        if (isDifferent(savedCoin.getMarketValue(), toSaveCoin.getMarketValue())) {
+            logger.log("info", "Updating market value for coin: " + savedCoin.getName());
             savedCoin.setMarketValue(toSaveCoin.getMarketValue());
             updateRequired = true;
         }
 
         if (updateRequired) {
-            coinServiceLogger.info("Coin updated successfully: " + savedCoin.getName());
             coinRepository.save(savedCoin);
-        }else{
-            coinServiceLogger.info("No updates required for coin: " + savedCoin.getName());
+            logger.log("info", "Coin updated successfully: " + savedCoin.getName());
+        } else {
+            logger.log("info", "No updates required for coin: " + savedCoin.getName());
         }
     }
 
+
     public List<Coin> listAll() {
-        coinServiceLogger.info("Listing all coins");
+        logger.log("info", "Listing all coins");
         List<Coin> coinList = coinRepository.findAll();
-        coinServiceLogger.info("Total coins listed: " + coinList.size());
+        logger.log("info", "Total coins listed: " + coinList.size());
         return coinList;
+    }
+
+
+    private void validateCoin(Coin coin) {
+        if (coin == null) {
+            logger.log("warn", COIN_NULL_ERROR);
+            throw new IllegalArgumentException(COIN_NULL_ERROR);
+        }
+    }
+
+    /**
+     * Checks if two comparable objects are different.
+     *
+     * @param obj1 the first object
+     * @param obj2 the second object
+     * @return true if they are different, false otherwise
+     */
+    private <T> boolean isDifferent(Comparable<T> obj1, T obj2) {
+        return obj1 == null || obj2 == null || obj1.compareTo(obj2) != 0;
     }
 }
