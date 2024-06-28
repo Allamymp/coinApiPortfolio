@@ -101,11 +101,6 @@ public class WalletService {
         return savedWallet;
     }
 
-    /**
-     * Validates if the wallet is not null.
-     *
-     * @param wallet the wallet to validate
-     */
     private void validateWallet(Wallet wallet) {
         if (wallet == null) {
             logger.log("warn", WALLET_NULL_ERROR);

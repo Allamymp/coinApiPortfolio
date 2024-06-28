@@ -168,23 +168,16 @@ public class ClientRepositoryTest {
     @Test
     @Transactional
     public void updateClient_withInvalidData_ThrowsException() {
-        // Arrange
-        Client client = clientRepository.save(CLIENT);
-
-        // Act & Assert
-        client.setEmail(null);
-        assertThatThrownBy(() -> clientRepository.save(client)).isInstanceOf(Exception.class);
-
-        client.setEmail("invalidEmail");
-        client.setPassword(null);
-        assertThatThrownBy(() -> clientRepository.save(client)).isInstanceOf(Exception.class);
+        // Arrange, Act & Assert
+        assertThatThrownBy(() -> clientRepository.save(INVALID_CLIENT)).isInstanceOf(Exception.class);
+        assertThatThrownBy(() -> clientRepository.save(EMPTY_CLIENT)).isInstanceOf(Exception.class);
     }
 
     @Test
     @Transactional
     public void deleteClient_byExistingId_deletesClient() {
         // Arrange
-      testEntityManager.persist(CLIENT);
+        testEntityManager.persist(CLIENT);
 
         // Act
         clientRepository.deleteById(CLIENT.getId());

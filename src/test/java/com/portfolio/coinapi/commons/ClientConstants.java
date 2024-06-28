@@ -12,7 +12,7 @@ public class ClientConstants {
     public static final Client CLIENT;
 
     static {
-        CLIENT = new Client("clientName@email.com", "cltPassword", new Wallet());
+        CLIENT = new Client("clientName@email.com", "Valid1Pass!", new Wallet());
         CLIENT.setUniqueToken(UUID.randomUUID().toString());
         CLIENT.getWallet().setClient(CLIENT);
     }

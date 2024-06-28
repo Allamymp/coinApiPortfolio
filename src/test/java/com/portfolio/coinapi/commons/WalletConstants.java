@@ -8,7 +8,7 @@ import java.util.List;
 
 public class WalletConstants {
 
-    public static final Wallet EMPTY_WALLET = new Wallet();
+    public static final Wallet INVALID_WALLET = new Wallet();
 
     public static final Wallet WALLET = new Wallet( new Client("clientName", "clientPassword"));
 

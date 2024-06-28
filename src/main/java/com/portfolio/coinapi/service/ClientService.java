@@ -58,18 +58,22 @@ public class ClientService {
         data.setPassword(passwordEncoder.encode(data.getPassword()));
         data.setUniqueToken(activationToken);
         Client client = clientRepository.save(data);
+
         wallet.setClient(client);
-        client.setWallet(walletService.create(wallet));
+        Wallet savedWallet = walletService.create(wallet);
+        if (savedWallet == null) {
+            throw new IllegalStateException("Failed to save wallet");
+        }
 
+        client.setWallet(savedWallet);
         clientRepository.save(client);
-
-        // Construir a URI do recurso recém-criado
 
         return ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(client.getId())
                 .toUri();
     }
+
 
     @Transactional(readOnly = true)
     public ResponseEntity<Client> findById(Long id) {
