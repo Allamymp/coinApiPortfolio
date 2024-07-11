@@ -1,6 +1,6 @@
 package com.portfolio.coinapi.service;
 
-
+import com.portfolio.coinapi.config.log.RedisLogger;
 import com.portfolio.coinapi.model.Coin;
 import com.portfolio.coinapi.model.Wallet;
 import com.portfolio.coinapi.repository.CoinRepository;
@@ -8,18 +8,15 @@ import com.portfolio.coinapi.repository.WalletRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.apache.logging.log4j.Logger;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import static com.portfolio.coinapi.commons.WalletConstants.WALLET;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+import static org.mockito.Mockito.*;
 
 class WalletServiceTest {
 
@@ -30,21 +27,24 @@ class WalletServiceTest {
     private CoinRepository coinRepository;
 
     @Mock
-    private Logger walletServiceLogger;
+    private RedisLogger walletServiceLogger;
 
     @InjectMocks
     private WalletService walletService;
 
+    @Captor
+    private ArgumentCaptor<Wallet> walletCaptor;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        WALLET.setId(1L);
     }
 
     @Test
     void create_ValidWallet_Success() {
         // Arrange
         Wallet wallet = WALLET;
-        wallet.setId(1L);
 
         when(walletRepository.save(wallet)).thenReturn(wallet);
 
@@ -56,23 +56,25 @@ class WalletServiceTest {
         assertEquals(wallet.getId(), createdWallet.getId());
 
         // Verify logs
-        verify(walletServiceLogger).info("Created wallet with ID: " + wallet.getId());
+        verify(walletServiceLogger).log("info", "Creating wallet with ID: " + wallet.getId());
+        verify(walletServiceLogger).log("info", "Wallet created successfully with ID: " + createdWallet.getId());
     }
 
     @Test
     void create_NullWallet_ExceptionThrown() {
         // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> walletService.create(null));
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> walletService.create(null));
+        assertEquals("Wallet object cannot be null", thrown.getMessage());
 
         // Verify logs
-        verify(walletServiceLogger).error("Failed to create wallet: wallet object is null.");
+        verify(walletServiceLogger).log("warn", "Wallet object cannot be null");
     }
 
     @Test
     void listCoinsByWalletId_ExistingWallet_ReturnsListOfCoins() {
         // Arrange
-        Long walletId = 1L;
-        Wallet wallet = new Wallet();
+        Wallet wallet = WALLET;
+        Long walletId = wallet.getId();
         Set<Coin> coinList = new HashSet<>();
         coinList.add(new Coin());
         coinList.add(new Coin());
@@ -88,8 +90,8 @@ class WalletServiceTest {
         assertEquals(coinList.size(), coins.size());
 
         // Verify logs
-        verify(walletServiceLogger).info("Retrieving coins for wallet ID: " + walletId);
-        verify(walletServiceLogger).info("Number of coins retrieved for wallet ID " + walletId + ": " + coins.size());
+        verify(walletServiceLogger).log("info", "Retrieving coins for wallet ID: " + walletId);
+        verify(walletServiceLogger).log("info", "Number of coins retrieved for wallet ID " + walletId + ": " + coins.size());
     }
 
     @Test
@@ -100,11 +102,12 @@ class WalletServiceTest {
         when(walletRepository.findById(walletId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(EntityNotFoundException.class, () -> walletService.listCoinsByWalletId(walletId));
+        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class, () -> walletService.listCoinsByWalletId(walletId));
+        assertEquals("Wallet not found for id: 1", thrown.getMessage());
 
         // Verify logs
-        verify(walletServiceLogger).info("Retrieving coins for wallet ID: " + walletId);
-        verify(walletServiceLogger).error("Wallet not found for ID: " + walletId);
+        verify(walletServiceLogger).log("info", "Retrieving coins for wallet ID: " + walletId);
+        verify(walletServiceLogger).log("warn", "Wallet not found for id: " + walletId);
     }
 
     @Test
@@ -115,35 +118,37 @@ class WalletServiceTest {
         when(walletRepository.findById(walletId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(EntityNotFoundException.class, () -> walletService.removeCoin(walletId, coinId));
+        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class, () -> walletService.removeCoin(walletId, coinId));
+        assertEquals("Wallet not found for id: 1", thrown.getMessage());
 
         // Verify logs
-        verify(walletServiceLogger).info("Attempting to remove coin ID: " + coinId + " from wallet ID: " + walletId);
-        verify(walletServiceLogger).error("Wallet not found for ID: " + walletId);
+        verify(walletServiceLogger).log("info", "Attempting to remove coin ID: " + coinId + " from wallet ID: " + walletId);
+        verify(walletServiceLogger).log("warn", "Wallet not found for id: " + walletId);
     }
 
     @Test
     void removeCoin_CoinNotFound_ThrowsEntityNotFoundException() {
         // Arrange
-        Long walletId = 1L;
         Long coinId = 1L;
         Wallet wallet = new Wallet();
+        Long walletId = wallet.getId();
         when(walletRepository.findById(walletId)).thenReturn(Optional.of(wallet));
 
         // Act & Assert
-        assertThrows(EntityNotFoundException.class, () -> walletService.removeCoin(walletId, coinId));
+        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class, () -> walletService.removeCoin(walletId, coinId));
+        assertEquals("Coin not found for id: 1", thrown.getMessage());
 
         // Verify logs
-        verify(walletServiceLogger).info("Attempting to remove coin ID: " + coinId + " from wallet ID: " + walletId);
-        verify(walletServiceLogger).error("Coin not found for ID: " + coinId + " in wallet ID: " + walletId);
+        verify(walletServiceLogger).log("info", "Attempting to remove coin ID: " + coinId + " from wallet ID: " + walletId);
+        verify(walletServiceLogger).log("warn", "Coin not found for id: " + coinId + " in wallet ID: " + walletId);
     }
 
     @Test
     void removeCoin_SuccessfullyRemovesCoin() {
         // Arrange
-        Long walletId = 1L;
         Long coinId = 1L;
-        Wallet wallet = new Wallet();
+        Wallet wallet = WALLET;
+        Long walletId = 1L;
         Coin coin = new Coin();
         coin.setId(coinId);
         Set<Coin> coinList = new HashSet<>();
@@ -159,8 +164,8 @@ class WalletServiceTest {
         assertFalse(wallet.getCoinList().contains(coin));
 
         // Verify logs
-        verify(walletServiceLogger).info("Attempting to remove coin ID: " + coinId + " from wallet ID: " + walletId);
-        verify(walletServiceLogger).info("Removed coin ID: " + coinId + " from wallet ID: " + walletId);
+        verify(walletServiceLogger).log("info", "Attempting to remove coin ID: " + coinId + " from wallet ID: " + walletId);
+        verify(walletServiceLogger).log("info", "Removed coin ID: " + coinId + " from wallet ID: " + walletId);
     }
 
     @Test
@@ -171,36 +176,38 @@ class WalletServiceTest {
         when(walletRepository.findById(walletId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(EntityNotFoundException.class, () -> walletService.addCoin(walletId, coinId));
+        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class, () -> walletService.addCoin(walletId, coinId));
+        assertEquals("Wallet not found for id: 1", thrown.getMessage());
 
         // Verify logs
-        verify(walletServiceLogger).info("Adding coin ID: " + coinId + " to wallet ID: " + walletId);
-        verify(walletServiceLogger).error("Wallet not found for ID: " + walletId);
+        verify(walletServiceLogger).log("info", "Adding coin ID: " + coinId + " to wallet ID: " + walletId);
+        verify(walletServiceLogger).log("warn", "Wallet not found for id: " + walletId);
     }
 
     @Test
     void addCoin_CoinNotFound_ThrowsEntityNotFoundException() {
         // Arrange
-        Long walletId = 1L;
         Long coinId = 1L;
-        Wallet wallet = new Wallet();
+        Wallet wallet = WALLET;
+        Long walletId = wallet.getId();
         when(walletRepository.findById(walletId)).thenReturn(Optional.of(wallet));
         when(coinRepository.findById(coinId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(EntityNotFoundException.class, () -> walletService.addCoin(walletId, coinId));
+        EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class, () -> walletService.addCoin(walletId, coinId));
+        assertEquals("Coin not found for id: 1", thrown.getMessage());
 
         // Verify logs
-        verify(walletServiceLogger).info("Adding coin ID: " + coinId + " to wallet ID: " + walletId);
-        verify(walletServiceLogger).error("Coin not found for ID: " + coinId);
+        verify(walletServiceLogger).log("info", "Adding coin ID: " + coinId + " to wallet ID: " + walletId);
+        verify(walletServiceLogger).log("warn", "Coin not found for id: " + coinId);
     }
 
     @Test
     void addCoin_CoinAlreadyPresentInWallet_ThrowsIllegalArgumentException() {
         // Arrange
-        Long walletId = 1L;
         Long coinId = 1L;
-        Wallet wallet = new Wallet();
+        Wallet wallet = WALLET;
+        Long walletId = wallet.getId();
         Coin coin = new Coin();
         coin.setId(coinId);
         Set<Coin> coinList = new HashSet<>();
@@ -211,19 +218,20 @@ class WalletServiceTest {
         when(coinRepository.findById(coinId)).thenReturn(Optional.of(coin));
 
         // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> walletService.addCoin(walletId, coinId));
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> walletService.addCoin(walletId, coinId));
+        assertEquals("Coin is already present in the wallet", thrown.getMessage());
 
         // Verify logs
-        verify(walletServiceLogger).info("Adding coin ID: " + coinId + " to wallet ID: " + walletId);
-        verify(walletServiceLogger).warn("Attempted to add duplicate coin ID: " + coinId + " to wallet ID: " + walletId);
+        verify(walletServiceLogger).log("info", "Adding coin ID: " + coinId + " to wallet ID: " + walletId);
+        verify(walletServiceLogger).log("warn", "Attempted to add duplicate coin ID: " + coinId + " to wallet ID: " + walletId);
     }
 
     @Test
     void addCoin_SuccessfullyAddsCoinToWallet() {
         // Arrange
-        Long walletId = 1L;
         Long coinId = 1L;
         Wallet wallet = new Wallet();
+        Long walletId = wallet.getId();
         Coin coin = new Coin();
         coin.setId(coinId);
 
@@ -238,6 +246,7 @@ class WalletServiceTest {
         assertTrue(updatedWallet.getCoinList().contains(coin));
 
         // Verify logs
-        verify(walletServiceLogger).info("Adding coin ID: " + coinId + " to wallet ID: " + walletId);
+        verify(walletServiceLogger).log("info", "Adding coin ID: " + coinId + " to wallet ID: " + walletId);
+        verify(walletServiceLogger).log("info", "Added coin ID: " + coinId + " to wallet ID: " + walletId);
     }
 }

@@ -39,12 +39,8 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(
                         auth -> auth
-                                .requestMatchers("/V1-authenticate").permitAll()
-                                .requestMatchers("/V1-register").permitAll()
-                                .requestMatchers("/activate/**").permitAll()
-                                .requestMatchers("/V1-forgetPassword/**").permitAll()
-                                .requestMatchers("/V1-reset/**").permitAll()
-                                .anyRequest().authenticated())
+
+                                .anyRequest().permitAll())
                 .httpBasic(Customizer.withDefaults())
                 .oauth2ResourceServer(
                         conf -> conf.jwt(

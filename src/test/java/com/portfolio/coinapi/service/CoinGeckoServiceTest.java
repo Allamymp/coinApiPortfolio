@@ -3,7 +3,8 @@ package com.portfolio.coinapi.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.portfolio.coinapi.client.CoinGeckoClient;
-import org.apache.logging.log4j.Logger;
+import com.portfolio.coinapi.config.log.RedisLogger;
+import com.portfolio.coinapi.model.Coin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -11,6 +12,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -24,7 +27,7 @@ class CoinGeckoServiceTest {
     private ObjectMapper objectMapper;
 
     @Mock
-    private Logger coinGeckoServiceLogger;
+    private RedisLogger coinGeckoServiceLogger;
 
     @InjectMocks
     private CoinGeckoService coinGeckoService;
@@ -42,11 +45,11 @@ class CoinGeckoServiceTest {
         when(objectMapper.readTree(anyString())).thenThrow(JsonProcessingException.class);
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> coinGeckoService.fetchCoinDetails());
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> coinGeckoService.fetchCoinDetails());
 
         // Verify logs
-        verify(coinGeckoServiceLogger).info("Fetching coin details from CoinGecko.");
-        verify(coinGeckoServiceLogger).error(anyString(), any(JsonProcessingException.class));
+        verify(coinGeckoServiceLogger).log(eq("info"), eq("Fetching coin details from CoinGecko."));
+        verify(coinGeckoServiceLogger).log(eq("warn"), contains("Error processing JSON from CoinGecko"));
     }
 
     @Test
@@ -61,8 +64,8 @@ class CoinGeckoServiceTest {
         assertTrue(pingStatus);
 
         // Verify logs
-        verify(coinGeckoServiceLogger).info("Checking CoinGecko ping status.");
-        verify(coinGeckoServiceLogger).info("Ping status received: OK");
+        verify(coinGeckoServiceLogger).log(eq("info"), eq("Checking CoinGecko ping status."));
+        verify(coinGeckoServiceLogger).log(eq("info"), eq("Ping status received: OK"));
     }
 
     @Test
@@ -77,8 +80,8 @@ class CoinGeckoServiceTest {
         assertFalse(pingStatus);
 
         // Verify logs
-        verify(coinGeckoServiceLogger).info("Checking CoinGecko ping status.");
-        verify(coinGeckoServiceLogger).info("Ping status received: NOT OK");
+        verify(coinGeckoServiceLogger).log(eq("info"), eq("Checking CoinGecko ping status."));
+        verify(coinGeckoServiceLogger).log(eq("info"), eq("Ping status received: NOT OK"));
     }
 
     @Test
@@ -93,6 +96,6 @@ class CoinGeckoServiceTest {
         assertTrue(coinIds.contains("solana"));
 
         // Verify logs
-        verify(coinGeckoServiceLogger).info("CoinGeckoService: calling  getAllCoinIdsAsString.");
+        verify(coinGeckoServiceLogger).log(eq("info"), eq("Getting all coin IDs as a comma-separated string."));
     }
 }

@@ -27,10 +27,8 @@ public class WalletService {
     public WalletService(WalletRepository walletRepository, CoinRepository coinRepository, RedisLogger logger) {
         this.walletRepository = walletRepository;
         this.coinRepository = coinRepository;
-
         this.logger = logger;
     }
-
 
     @Transactional
     public Wallet create(Wallet wallet) {
@@ -40,7 +38,6 @@ public class WalletService {
         logger.log("info", "Wallet created successfully with ID: " + createdWallet.getId());
         return createdWallet;
     }
-
 
     @Transactional(readOnly = true)
     public Set<Coin> listCoinsByWalletId(Long walletId) {
@@ -54,7 +51,6 @@ public class WalletService {
         logger.log("info", "Number of coins retrieved for wallet ID " + walletId + ": " + coins.size());
         return coins;
     }
-
 
     @Transactional
     public void removeCoin(Long walletId, Long coinId) {

@@ -24,14 +24,12 @@ public class CoinService {
         this.logger = logger;
     }
 
-
     public void createCoin(Coin coin) {
         validateCoin(coin);
         logger.log("info", "Creating coin with name: " + coin.getName());
         coinRepository.save(coin);
         logger.log("info", "Coin successfully created: " + coin.getName());
     }
-
 
     public void updateCoin(Coin toSaveCoin) {
         validateCoin(toSaveCoin);
@@ -73,14 +71,12 @@ public class CoinService {
         }
     }
 
-
     public List<Coin> listAll() {
         logger.log("info", "Listing all coins");
         List<Coin> coinList = coinRepository.findAll();
         logger.log("info", "Total coins listed: " + coinList.size());
         return coinList;
     }
-
 
     private void validateCoin(Coin coin) {
         if (coin == null) {
@@ -89,13 +85,6 @@ public class CoinService {
         }
     }
 
-    /**
-     * Checks if two comparable objects are different.
-     *
-     * @param obj1 the first object
-     * @param obj2 the second object
-     * @return true if they are different, false otherwise
-     */
     private <T> boolean isDifferent(Comparable<T> obj1, T obj2) {
         return obj1 == null || obj2 == null || obj1.compareTo(obj2) != 0;
     }
