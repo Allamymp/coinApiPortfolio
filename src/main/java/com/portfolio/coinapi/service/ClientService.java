@@ -5,6 +5,7 @@ import com.portfolio.coinapi.config.log.RedisLogger;
 import com.portfolio.coinapi.model.Client;
 import com.portfolio.coinapi.model.Wallet;
 import com.portfolio.coinapi.repository.ClientRepository;
+import com.portfolio.coinapi.util.DTOUtils;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +31,11 @@ public class ClientService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
-    public ClientService(ClientRepository clientRepository, WalletService walletService, RedisLogger redisLogger, PasswordEncoder passwordEncoder, EmailService emailService) {
+    public ClientService(ClientRepository clientRepository,
+                         WalletService walletService,
+                         RedisLogger redisLogger,
+                         PasswordEncoder passwordEncoder,
+                         EmailService emailService) {
         this.clientRepository = clientRepository;
         this.walletService = walletService;
         this.clientServiceLogger = redisLogger;
@@ -39,7 +44,7 @@ public class ClientService {
     }
 
     @Transactional
-    public URI create(Client data) {
+    public URI create(Client data) throws Exception {
         String username = data.getEmail();
         if (clientRepository.existsByEmail(username)) {
             clientServiceLogger.log("info", "ClientService: User with username " + username + " already exists in database.");
@@ -70,17 +75,17 @@ public class ClientService {
 
         return ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(client.getId())
+                .buildAndExpand(DTOUtils.encryptId(client.getId()))
                 .toUri();
     }
 
-
     @Transactional(readOnly = true)
-    public ResponseEntity<Client> findById(Long id) {
+    public ResponseEntity<Client> findById(String id) {
         clientServiceLogger.log("info", "Searching for client with ID: " + id);
-        Optional<Client> client = clientRepository.findById(id);
+        Long decryptedId = DTOUtils.decryptId(id);
+        Optional<Client> client = clientRepository.findById(decryptedId);
         if (client.isPresent()) {
-            clientServiceLogger.log("info", "Client found for id " + id + ":" + client);
+            clientServiceLogger.log("info", "Client found for id " + id + ": " + client);
             return ResponseEntity.status(HttpStatus.OK).body(client.get());
         } else {
             clientServiceLogger.log("info", "Client not found for id: " + id);
@@ -151,7 +156,6 @@ public class ClientService {
         return null;
     }
 
-
     private String generateRandomPassword(int length) {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder newPassword = new StringBuilder();
@@ -166,7 +170,7 @@ public class ClientService {
         if (password.length() < 8 || password.length() > 12) {
             return false;
         }
-        // verficia se senha corresponde parametros
+        // Verifica se a senha corresponde aos parâmetros
         Pattern upperCase = Pattern.compile("[A-Z]");
         Pattern lowerCase = Pattern.compile("[a-z]");
         Pattern specialChar = Pattern.compile("[!@#$%^&*()-_+=<>?/{}\\[\\]]");

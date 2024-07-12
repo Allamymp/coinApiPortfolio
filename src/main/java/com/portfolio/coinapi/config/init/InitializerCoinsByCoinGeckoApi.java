@@ -36,7 +36,7 @@ public class InitializerCoinsByCoinGeckoApi {
                 updateCoins();
             }
         } catch (Exception e) {
-            logger.log("warn", "Error initializing coin data.");
+            logger.log("warn", "Error initializing coin data: " + e.getMessage());
         }
     }
 
@@ -46,12 +46,11 @@ public class InitializerCoinsByCoinGeckoApi {
         try {
             logger.log("info", "Updating coin data...");
             List<Coin> coinList = coinGeckoService.fetchCoinDetails();
+            logger.log("info", "Fetched coin details successfully, updating coins...");
             coinList.forEach(coinService::updateCoin);
             logger.log("info", "Coin data updated successfully.");
         } catch (Exception e) {
-            logger.log("warn", "Error updating coin data.");
+            logger.log("warn", "Error updating coin data: " + e.getMessage());
         }
     }
-
-
 }

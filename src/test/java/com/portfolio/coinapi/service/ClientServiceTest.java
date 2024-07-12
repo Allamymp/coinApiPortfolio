@@ -16,10 +16,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import com.portfolio.coinapi.util.DTOUtils;
+
 
 import java.net.URI;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -52,7 +53,7 @@ public class ClientServiceTest {
     }
 
     @Test
-    void createClient_withValidData_returnsClientUri() {
+    void createClient_withValidData_returnsClientUri() throws Exception {
         // Arrange
         Client client = new Client();
         client.setEmail("test@example.com");
@@ -76,7 +77,7 @@ public class ClientServiceTest {
         // Assert
         URI expectedUri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(1L)
+                .buildAndExpand(DTOUtils.encryptId(1L))
                 .toUri();
 
         assertEquals(expectedUri, resultUri);
@@ -116,7 +117,7 @@ public class ClientServiceTest {
         when(clientRepository.findById(1L)).thenReturn(Optional.of(client));
 
         // Act
-        ResponseEntity<Client> response = clientService.findById(1L);
+        ResponseEntity<Client> response = clientService.findById(DTOUtils.encryptId(1L));
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -129,7 +130,7 @@ public class ClientServiceTest {
         when(clientRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act
-        ResponseEntity<Client> response = clientService.findById(1L);
+        ResponseEntity<Client> response = clientService.findById(DTOUtils.encryptId(1L));
 
         // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());

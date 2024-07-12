@@ -32,22 +32,32 @@ public class ClientController {
 
     @PostMapping
     public ResponseEntity<Void> create(@Valid @RequestBody Client client) {
-        logger.log("info", "Request to create new client: " + client.getEmail());
-        URI location = clientService.create(client);
-        logger.log("info", "Client created successfully: " + client.getEmail());
-        return ResponseEntity.created(location).build();
+        try {
+            logger.log("info", "Request to create new client: " + client.getEmail());
+            URI location = clientService.create(client);
+            logger.log("info", "Client created successfully: " + client.getEmail());
+            return ResponseEntity.created(location).build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Client> findById(@PathVariable Long id) {
-        logger.log("info", "Request to find client by ID: " + id);
-        ResponseEntity<Client> response = clientService.findById(id);
-        if (response.getStatusCode() == HttpStatus.OK) {
-            logger.log("info", "Client found: " + id);
-        } else {
-            logger.log("warn", "Client not found: " + id);
+    public ResponseEntity<Client> findById(@PathVariable String id) {
+        try {
+            logger.log("info", "Request to find client by ID: " + id);
+            ResponseEntity<Client> response = clientService.findById(id);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                logger.log("info", "Client found: " + id);
+            } else {
+                logger.log("warn", "Client not found: " + id);
+            }
+            return response;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return response;
+
     }
 
     @GetMapping("/username")

@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
-@Transactional
 public class WalletService {
 
     private static final String WALLET_NULL_ERROR = "Wallet object cannot be null";

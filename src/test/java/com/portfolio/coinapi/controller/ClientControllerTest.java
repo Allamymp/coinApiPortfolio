@@ -49,7 +49,7 @@ class ClientControllerTest {
     }
 
     @Test
-    void createClient_Success() {
+    void createClient_Success() throws Exception {
         // Arrange
         Client client = new Client();
         client.setEmail("test@example.com");
@@ -69,9 +69,9 @@ class ClientControllerTest {
     @Test
     void findClientById_Success() {
         // Arrange
-        Long clientId = 1L;
+        String clientId = "1";
         Client client = new Client();
-        client.setId(clientId);
+        client.setId(1L);
         when(clientService.findById(clientId)).thenReturn(new ResponseEntity<>(client, HttpStatus.OK));
 
         // Act
@@ -87,7 +87,7 @@ class ClientControllerTest {
     @Test
     void findClientById_NotFound() {
         // Arrange
-        Long clientId = 1L;
+        String clientId = "1";
         when(clientService.findById(clientId)).thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
         // Act

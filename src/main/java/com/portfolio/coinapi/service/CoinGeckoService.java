@@ -91,6 +91,7 @@ public class CoinGeckoService {
                 listCoins.add(coin);
             } catch (Exception e) {
                 logger.log("warn", "Error parsing coin details for " + name + ": " + e.getMessage());
+                e.printStackTrace();
             }
         }
         logger.log("info", "Received and processed coin details for " + listCoins.size() + " coins.");
